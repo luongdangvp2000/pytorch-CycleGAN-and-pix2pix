@@ -5,6 +5,7 @@ import ntpath
 import time
 from . import util, html
 from subprocess import Popen, PIPE
+from torch.utils.tensorboard import SummaryWriter
 
 
 if sys.version_info[0] == 2:
@@ -219,3 +220,21 @@ class Visualizer():
         print(message)  # print the message
         with open(self.log_name, "a") as log_file:
             log_file.write('%s\n' % message)  # save the message
+
+class Logger(object):
+    def __init__(self, log_dir):
+        """Create a summary writer logging to log_dir."""
+        self.writer = SummaryWriter(log_dir)
+
+    def scalar_summary(self, tag, value, step):
+        """Log a scalar variable."""
+        with self.writer.as_default():
+            self.writer.add_scalar(tag, value, step=step)
+
+    def list_of_scalars_summary(self, tag_value_pairs, step):
+        """Log scalar variables."""
+        with self.writer.as_default():
+            for tag, value in tag_value_pairs:
+                self.writer.add_scalar(tag, value, step=step)
+
+    def image_summary(self, tag, va)
