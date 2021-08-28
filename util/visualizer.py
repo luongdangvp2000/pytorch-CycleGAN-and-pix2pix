@@ -222,19 +222,47 @@ class Visualizer():
             log_file.write('%s\n' % message)  # save the message
 
 class Logger(object):
-    def __init__(self, log_dir):
+    def __init__(self, opt):
         """Create a summary writer logging to log_dir."""
-        self.writer = SummaryWriter(log_dir)
+        self.opt = opt
+        self.log_dir = os.path.join(opt.checkpoints_dir, opt.name)
+        self.writer = SummaryWriter(self.log_dir)
+        # create a logging file to store training losses
+        self.log_name = os.path.join(opt.checkpoints_dir, opt.name, 'loss_log.txt')
+        with open(self.log_name, "a") as log_file:
+            now = time.strftime("%c")
+            log_file.write('================ Training Loss (%s) ================\n' % now)
 
     def scalar_summary(self, tag, value, step):
         """Log a scalar variable."""
-        with self.writer.as_default():
-            self.writer.add_scalar(tag, value, step=step)
+        self.writer.add_scalar(tag, value, global_step=step)
 
     def list_of_scalars_summary(self, tag_value_pairs, step):
         """Log scalar variables."""
-        with self.writer.as_default():
-            for tag, value in tag_value_pairs:
-                self.writer.add_scalar(tag, value, step=step)
+        for tag, value in tag_value_pairs.items():
+            self.writer.add_scalar(tag, value, global_step=step)
 
-    def image_summary(self, tag, va)
+    def images_summary(self, visuals, step):
+        for label, image in visuals.items():
+            image_numpy = util.tensor2im(image)
+            # print("image visual shape ", image_numpy.transpose([2, 0, 1]))
+            self.writer.add_image(label, image_numpy.transpose([2, 0, 1]), global_step=step)
+
+
+    def print_current_losses(self, epoch, iters, losses, t_comp, t_data):
+        """print current losses on console; also save the losses to the disk
+
+        Parameters:
+            epoch (int) -- current epoch
+            iters (int) -- current training iteration during this epoch (reset to 0 at the end of every epoch)
+            losses (OrderedDict) -- training losses stored in the format of (name, float) pairs
+            t_comp (float) -- computational time per data point (normalized by batch_size)
+            t_data (float) -- data loading time per data point (normalized by batch_size)
+        """
+        message = '(epoch: %d, iters: %d, time: %.3f, data: %.3f) ' % (epoch, iters, t_comp, t_data)
+        for k, v in losses.items():
+            message += '%s: %.3f ' % (k, v)
+
+        print(message)  # print the message
+        with open(self.log_name, "a") as log_file:
+            log_file.write('%s\n' % message)  # save the message
