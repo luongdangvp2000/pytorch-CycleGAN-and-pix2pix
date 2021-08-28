@@ -227,6 +227,8 @@ class Logger(object):
         self.opt = opt
         self.log_dir = os.path.join(opt.checkpoints_dir, opt.name)
         self.writer = SummaryWriter(self.log_dir)
+        self.img_dir = os.path.join(self.log_dir, 'images')
+        util.mkdirs([self.img_dir])
         # create a logging file to store training losses
         self.log_name = os.path.join(opt.checkpoints_dir, opt.name, 'loss_log.txt')
         with open(self.log_name, "a") as log_file:
@@ -247,6 +249,9 @@ class Logger(object):
             image_numpy = util.tensor2im(image)
             # print("image visual shape ", image_numpy.transpose([2, 0, 1]))
             self.writer.add_image(label, image_numpy.transpose([2, 0, 1]), global_step=step)
+            img_path = os.path.join(self.img_dir, 'step%.3d_%s.png' % (step, label))
+            util.save_image(image_numpy, img_path)
+
 
 
     def print_current_losses(self, epoch, iters, losses, t_comp, t_data):
