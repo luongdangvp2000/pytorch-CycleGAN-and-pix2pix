@@ -19,16 +19,28 @@ See training and test tips at: https://github.com/junyanz/pytorch-CycleGAN-and-p
 See frequently asked questions at: https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/qa.md
 """
 import time
+from copy import deepcopy
 from options.train_options import TrainOptions
 from data import create_dataset
 from models import create_model
 from util.visualizer import Visualizer, Logger
+from util.metric import PSNR, SSIM
+from validate import validate
+
+
+
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
+    opt_val = deepcopy(opt) # copy opt and change phase to test for creating val dataset
+    opt_val.phase = 'val'
+    opt_val.batch_size = 64 # use batch size 64 for fast validating  
+    
     dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
+    val_dataset = create_dataset(opt_val) # create a valid dataset given opt.dataset_mode and other options
     dataset_size = len(dataset)    # get the number of images in the dataset.
     print('The number of training images = %d' % dataset_size, len(dataset.dataloader))
+    print('The number of val images = %d' % len(val_dataset), len(val_dataset.dataloader))
 
     model = create_model(opt)      # create a model given opt.model and other options
     model.setup(opt)               # regular setup: load and print networks; create schedulers
@@ -79,3 +91,6 @@ if __name__ == '__main__':
             model.save_networks(epoch)
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
+
+        #===========================
+        validate(model, val_dataset, epoch, logger)
