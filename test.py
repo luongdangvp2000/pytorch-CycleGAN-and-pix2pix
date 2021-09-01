@@ -32,6 +32,8 @@ from data import create_dataset
 from models import create_model
 from util.visualizer import save_images
 from util import html
+from util.metric import PSNR, SSIM
+import json
 
 
 if __name__ == '__main__':
@@ -56,6 +58,8 @@ if __name__ == '__main__':
     # For [CycleGAN]: It should not affect CycleGAN as CycleGAN uses instancenorm without dropout.
     if opt.eval:
         model.eval()
+    opt.num_test = len(dataset.dataset)
+    scores_dict = {}
     for i, data in enumerate(dataset):
         if i >= opt.num_test:  # only apply our model to opt.num_test images.
             break
@@ -66,4 +70,10 @@ if __name__ == '__main__':
         if i % 5 == 0:  # save images to an HTML file
             print('processing (%04d)-th image... %s' % (i, img_path))
         save_images(webpage, visuals, img_path, aspect_ratio=opt.aspect_ratio, width=opt.display_winsize)
+        # print(type(PSNR(visuals['real_B'], visuals['fake_B'], reduction='mean').detach().cpu().numpy().item()), SSIM(visuals['real_B'], visuals['fake_B'], reduction='mean').detach().cpu().numpy().item())
+        scores_dict[img_path[0]] = [PSNR(visuals['real_B'], visuals['fake_B'], reduction='mean').detach().cpu().numpy().item(), SSIM(visuals['real_B'], visuals['fake_B'], reduction='mean').detach().cpu().numpy().item()]
     webpage.save()  # save the HTML
+
+    with open('scores_dict.json', 'w') as fp:
+        json.dump(scores_dict, fp)
+
