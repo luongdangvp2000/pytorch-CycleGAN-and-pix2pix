@@ -17,7 +17,8 @@ def validate(model, dataset, epoch, logger):
     
     psnr_list = []
     ssim_list = []
-    model.netG.eval() # switch netG to eval model for validating
+    # model.netG.eval() # switch netG to eval model for validating
+    model.eval() 
     with torch.no_grad():
         epoch_start_time = time.time() # calculate time
         for i, data in enumerate(dataset):  # inner loop within one epoch
@@ -38,8 +39,6 @@ def validate(model, dataset, epoch, logger):
     print("SSIM score in validating phase is ", ssim_value, " at epoch ", epoch)
     print("Time for validating is %d sec" % (epoch_start_time - time.time()))
 
-    model.netG.train() # after validating, set netG to training model
-
-
-
-            
+    model.train()
+    # model.netG.train() # after validating, set netG to training model
+ 
