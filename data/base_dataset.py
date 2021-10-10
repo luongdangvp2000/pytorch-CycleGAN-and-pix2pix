@@ -8,6 +8,9 @@ import torch.utils.data as data
 from PIL import Image
 import torchvision.transforms as transforms
 from abc import ABC, abstractmethod
+import albumentations as A
+from albumentations.pytorch.transforms import ToTensor, ToTensorV2
+import cv2
 
 
 class BaseDataset(data.Dataset, ABC):
@@ -60,6 +63,15 @@ class BaseDataset(data.Dataset, ABC):
         pass
 
 
+class Albumentations:
+    def __init__(self, augmentations):
+        self.augmentations = A.Compose(augmentations)
+    
+    def __call__(self, image):
+        image = self.augmentations(image=image)['image']
+        return image
+
+
 def get_params(opt, size):
     w, h = size
     new_h = h
@@ -81,10 +93,11 @@ def get_params(opt, size):
 def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, convert=True):
     transform_list = []
     if grayscale:
-        transform_list.append(transforms.Grayscale(1))
+        transform_list.append(transforms0.Grayscale(1))
     if 'resize' in opt.preprocess:
         osize = [opt.load_size, opt.load_size]
         transform_list.append(transforms.Resize(osize, method))
+        
     elif 'scale_width' in opt.preprocess:
         transform_list.append(transforms.Lambda(lambda img: __scale_width(img, opt.load_size, opt.crop_size, method)))
 
@@ -110,6 +123,48 @@ def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, conve
         else:
             transform_list += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     return transforms.Compose(transform_list)
+
+def get_transform_for_petct(opt, params=None, method=Image.BICUBIC, convert=True):
+    transform_list = []
+    # transform_list += [transform.Lambda(lambda img: img.astype(torch.float32).unsqueeze(-1))
+
+    if 'resize' in opt.preprocess:
+        # osize = [opt.load_size, opt.load_size]
+        # transform_list.append(transforms.Resize(osize, method))
+        transform_list.append(A.Resize(opt.load_size, opt.load_size, interpolation=cv2.INTER_NEAREST))
+
+    # elif 'scale_width' in opt.preprocess:
+    #     transform_list.append(transforms.Lambda(lambda img: __scale_width(img, opt.load_size, opt.crop_size, method)))
+    
+    # print(params)
+
+    if 'crop' in opt.preprocess:
+        # if params is None:
+        #     transform_list.append(transforms.RandomCrop(opt.crop_size))
+        # else:
+        #     transform_list.append(transforms.Lambda(lambda img: __crop(img, params['crop_pos'], opt.crop_size)))
+        transform_list.append(A.RandomCrop(opt.crop_size, opt.crop_size))
+
+    # if opt.preprocess == 'none':
+    #     transform_list.append(transforms.Lambda(lambda img: __make_power_2(img, base=4, method=method)))
+
+    if not opt.no_flip:
+        # if params is None:
+        #     transform_list.append(transforms.RandomHorizontalFlip())
+        # elif params['flip']:
+        #     transform_list.append(transforms.Lambda(lambda img: __flip(img, params['flip'])))
+        transform_list.append(A.HorizontalFlip())
+
+    # if convert:
+    #     transform_list += [transforms.ToTensor()]
+    #     transform_list += [transforms.Normalize ((0.5,), (0.5,))] # Always gray image in petct project
+
+    return transforms.Compose([
+        Albumentations(transform_list),
+        transforms.ToTensor(),
+        transforms.Lambda(lambda img: img / img.max()),
+        transforms.Normalize ((0.5,), (0.5,))
+        ])
 
 
 def __make_power_2(img, base, method=Image.BICUBIC):
