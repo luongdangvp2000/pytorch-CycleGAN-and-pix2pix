@@ -6,9 +6,9 @@ from models import create_model
 from util.visualizer import Visualizer, Logger
 from util.metric import PSNR, SSIM
 from validate import validate
+import torch
 
-
-
+torch.set_printoptions(precision=10)
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
@@ -24,8 +24,8 @@ if __name__ == '__main__':
     A = data[0]['A']
     # print(A.sum(), A.mean(), A.max(), A.min(), A.shape, B.sum())
     for i, data in enumerate(dataset):
-        print(i)
-        print(data)
-        print(data['A'].sum(), data['A'].mean())
+        # print(i)
+        # print(data)
+        # print(data['A'].mean(), data['B'].mean())
         break
     

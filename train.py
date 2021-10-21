@@ -48,6 +48,9 @@ if __name__ == '__main__':
     logger = Logger(opt)
     total_iters = 0                # the total number of training iterations
     model.print_networks(True)         # print the network
+    best_psnr = 0.0
+    best_ssim = 0.0
+    best_mae = 10000
 
     for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    # outer loop for different epochs; we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>
         epoch_start_time = time.time()  # timer for entire epoch
@@ -64,6 +67,7 @@ if __name__ == '__main__':
             epoch_iter += opt.batch_size
             model.set_input(data)         # unpack data from dataset and apply preprocessing
             model.optimize_parameters()   # calculate loss functions, get gradients, update network weights
+            
             logger.list_of_scalars_summary(model.get_current_losses(), i+epoch*len(dataset.dataloader))
 
             if total_iters % opt.display_freq == 0:   # display images on visdom and save images to a HTML file
@@ -94,4 +98,16 @@ if __name__ == '__main__':
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
 
         #===========================
-        validate(model, val_dataset, epoch, logger)
+        psnr_value, ssim_value, mae_value = validate(model, val_dataset, epoch, logger)
+        if psnr_value > best_psnr:
+            best_psnr = psnr_value
+            model.save_networks("best_psnr")
+        
+        if ssim_value > best_ssim:
+            best_ssim = ssim_value
+            model.save_networks("best_ssim")
+        
+        if mae_value > best_mae:
+            best_mae = mae_value
+            model.save_networks("best_mae")
+

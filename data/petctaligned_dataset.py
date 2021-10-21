@@ -56,8 +56,9 @@ class PetctAlignedDataset(BaseDataset):
         # read a image given a random integer index
         A_path = os.path.join(self.dir_AB,f"CT__{self.AB_paths[index]}.npz")
         B_path = os.path.join(self.dir_AB,f"PET__{self.AB_paths[index]}.npz")
-        A = np.load(A_path)['data'] 
-        B = np.load(B_path)['data'] 
+        A = np.load(A_path)['data'].astype(np.float32) 
+        B = np.load(B_path)['data'].astype(np.float32)
+        # print(A.max(), A.min(), B.max(), B.min())
 
         # AB_path = self.AB_paths[index]
         # AB = Image.open(AB_path).convert('RGB')
@@ -71,9 +72,15 @@ class PetctAlignedDataset(BaseDataset):
         transform_params = get_params(self.opt, B.shape)
         A_transform = get_transform_for_petct(self.opt, transform_params)
         B_transform = get_transform_for_petct(self.opt, transform_params)
+        # print("Before transform ", A.max(), A.min(), A.mean(), B.max(), B.min(), B.mean())
+
 
         A = A_transform(A)
-        B = B_transform(B)                                                                                                                   
+        B = B_transform(B)   
+
+        # print(B.dtype)      
+        # print("After transform ", A.max(), A.min(), A.mean(), B.max(), B.min(), B.mean())
+
 
         return {'A': A, 'B': B, 'A_paths': A_path, 'B_paths': B_path}
 

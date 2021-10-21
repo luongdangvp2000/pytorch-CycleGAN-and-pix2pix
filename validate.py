@@ -17,6 +17,8 @@ def validate(model, dataset, epoch, logger):
     
     psnr_list = []
     ssim_list = []
+    mae_list = []
+    l1_loss = torch.nn.L1Loss(reduction='none')
     # model.netG.eval() # switch netG to eval model for validating
     model.eval() 
     with torch.no_grad():
@@ -28,17 +30,23 @@ def validate(model, dataset, epoch, logger):
             # print(len(PSNR(visuals['real_B'], visuals['fake_B'], reduction='none').detach().cpu().numpy()))
             psnr_list.append(PSNR(visuals['real_B'], visuals['fake_B'], reduction='none').detach().cpu().numpy())
             ssim_list.append(SSIM(visuals['real_B'], visuals['fake_B'], reduction='none').detach().cpu().numpy())
+            mae_list.append(l1_loss(visuals['real_B'], visuals['fake_B']).detach().cpu().numpy())
         
     psnr_list = np.concatenate(psnr_list, 0)
     ssim_list = np.concatenate(ssim_list, 0)
+    mae_list = np.concatenate(mae_list, 0)
     psnr_value = psnr_list.mean()
     ssim_value = ssim_list.mean()
+    mae_value = mae_list.mean()
     logger.scalar_summary("val_psnr", psnr_value, epoch)
     logger.scalar_summary("val_ssim", ssim_value, epoch)
+    logger.scalar_summary('val_mae', mae_value, epoch)
     print("PSNR score in validating phase is ", psnr_value, " at epoch ", epoch)
     print("SSIM score in validating phase is ", ssim_value, " at epoch ", epoch)
+    print("MAE score in validating phase is ", mae_value, " at epoch ", epoch)
     print("Time for validating is %d sec" % (epoch_start_time - time.time()))
 
     model.train()
     # model.netG.train() # after validating, set netG to training model
+    return psnr_value, ssim_value, mae_value
  

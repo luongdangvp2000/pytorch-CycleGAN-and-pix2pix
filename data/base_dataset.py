@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensor, ToTensorV2
 import cv2
+import torch
 
 
 class BaseDataset(data.Dataset, ABC):
@@ -69,7 +70,13 @@ class Albumentations:
     
     def __call__(self, image):
         image = self.augmentations(image=image)['image']
+        # print('Before to tensor ', image.max(), image.min(), image.dtype)
+
         return image
+        # if len(image.shape) == 2: # 2D image
+        #     return torch.from_numpy(image).unsqueeze(0).type(torch.float32)
+        # elif len(image.shape) == 3:
+        #     return torch.from_numpy(image).permute(2, 0, 1).type(torch.float32)
 
 
 def get_params(opt, size):
@@ -162,7 +169,7 @@ def get_transform_for_petct(opt, params=None, method=Image.BICUBIC, convert=True
     return transforms.Compose([
         Albumentations(transform_list),
         transforms.ToTensor(),
-        transforms.Lambda(lambda img: img / img.max()),
+        # transforms.Lambda(lambda img: img / img.max()), # neu chia max o day thi sai
         transforms.Normalize ((0.5,), (0.5,))
         ])
 
