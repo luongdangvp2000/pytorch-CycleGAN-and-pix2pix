@@ -131,7 +131,7 @@ def get_transform(opt, params=None, grayscale=False, method=Image.BICUBIC, conve
             transform_list += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     return transforms.Compose(transform_list)
 
-def get_transform_for_petct(opt, params=None, method=Image.BICUBIC, convert=True):
+def get_transform_for_petct(opt, params=None, convert=True):
     transform_list = []
     # transform_list += [transform.Lambda(lambda img: img.astype(torch.float32).unsqueeze(-1))
 
@@ -165,6 +165,8 @@ def get_transform_for_petct(opt, params=None, method=Image.BICUBIC, convert=True
     # if convert:
     #     transform_list += [transforms.ToTensor()]
     #     transform_list += [transforms.Normalize ((0.5,), (0.5,))] # Always gray image in petct project
+
+    # print(transform_list)
 
     return transforms.Compose([
         Albumentations(transform_list),

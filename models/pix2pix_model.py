@@ -46,6 +46,9 @@ class Pix2PixModel(BaseModel):
             opt (Option class)-- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         BaseModel.__init__(self, opt)
+
+        self.use_pet_as_mask_loss = True
+
         # specify the training losses you want to print out. The training/test scripts will call <BaseModel.get_current_losses>
         self.loss_names = ['G_GAN', 'G_L1', 'D_real', 'D_fake']
         # specify the images you want to save/display. The training/test scripts will call <BaseModel.get_current_visuals>
@@ -73,7 +76,11 @@ class Pix2PixModel(BaseModel):
             self.optimizers.append(self.optimizer_D)
             self.use_mask = opt.use_mask
             self.lambda_mask = opt.lambda_mask
-            if self.use_mask:
+            # if self.use_mask:
+            #     self.criterionL1 = torch.nn.L1Loss(reduction='none')
+            # else:
+            #     self.criterionL1 = torch.nn.L1Loss(reduction='mean')
+            if self.use_pet_as_mask_loss:
                 self.criterionL1 = torch.nn.L1Loss(reduction='none')
             else:
                 self.criterionL1 = torch.nn.L1Loss(reduction='mean')
@@ -95,10 +102,14 @@ class Pix2PixModel(BaseModel):
         AtoB = self.opt.direction == 'AtoB'
         self.real_A = input['A' if AtoB else 'B'].to(self.device)
         self.real_B = input['B' if AtoB else 'A'].to(self.device)
-        if (self.use_mask):
-            self.mask_A = (input['A' if AtoB else 'B'] > 0).type(torch.int8).to(self.device) 
-            self.mask_A = self.mask_A * self.lambda_mask
-            self.masK_A = torch.ones_like(self.mask_A) + self.mask_A
+        # if (self.use_mask):
+        #     self.mask_A = (input['A' if AtoB else 'B'] > 0).type(torch.int8).to(self.device) 
+        #     self.mask_A = self.mask_A * self.lambda_mask
+        #     self.masK_A = torch.ones_like(self.mask_A) + self.mask_A
+        if self.use_pet_as_mask_loss:
+            self.pet_mask = (input['A' if AtoB else 'B'] / 2 + 0.5).to(self.device)
+            
+
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
     def forward(self):
@@ -127,8 +138,15 @@ class Pix2PixModel(BaseModel):
         self.loss_G_GAN = self.criterionGAN(pred_fake, True)
         # Second, G(A) = B
         self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) 
-        if self.use_mask:
-            self.loss_G_L1 *= self.mask_A
+        
+        # if self.use_mask:
+        #     self.loss_G_L1 *= self.mask_A
+        #     self.loss_G_L1 = self.loss_G_L1.mean() * self.opt.lambda_L1
+        # else:
+        #     self.loss_G_L1 *= self.opt.lambda_L1
+
+        if self.use_pet_as_mask_loss:
+            self.loss_G_L1 *= self.pet_mask
             self.loss_G_L1 = self.loss_G_L1.mean() * self.opt.lambda_L1
         else:
             self.loss_G_L1 *= self.opt.lambda_L1

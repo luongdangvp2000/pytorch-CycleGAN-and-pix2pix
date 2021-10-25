@@ -78,6 +78,9 @@ class PetctAlignedDataset(BaseDataset):
         A = A_transform(A)
         B = B_transform(B)   
 
+        # print(A_transform, B_transform)
+
+
         # print(B.dtype)      
         # print("After transform ", A.max(), A.min(), A.mean(), B.max(), B.min(), B.mean())
 
