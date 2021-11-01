@@ -175,6 +175,10 @@ def get_transform_for_petct(opt, params=None, convert=True):
         transforms.Normalize ((0.5,), (0.5,))
         ])
 
+def norm_SUV(image):
+    image = (image - image.min()) / (image.max() - image.min()) 
+    return image
+
 
 def __make_power_2(img, base, method=Image.BICUBIC):
     ow, oh = img.size

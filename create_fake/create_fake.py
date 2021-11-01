@@ -5,11 +5,14 @@ import pickle
 from tqdm import tqdm
 import pydicom
 import shutil
+import copy
 
-metadata_path = "/media/tuan/Data1/DATA_PET/old_petct_npz/metadata/pet_case_data.pkl"
-predict_dir = "/home/tuan/linh/img2img_miccai2022/codebase/pytorch-CycleGAN-and-pix2pix/predict"
-fake_dicom_out_dir = "./fake_dicom/"
-origin_dicom_out_dir = "./origin_dicom/"
+metadata_path = "/media/tuan/Data1/DATA_PET/norm_in_img_full_petct_npz/metadata/pet_case_data.pkl"
+# predict_dir = "/media/tuan/Data1/img2img_miccai2022/research_checkpoints/pix2pix_cyclegan/ct2pet_pix2pix_lsgan_unet256_70x70PatchGan_norm_in_img_headneck_npzdata_full_no_mask_training/predict"
+out_dir = "/home/tuan/linh/img2img_miccai2022/data/data/norm_in_img_full_petct_npz/"
+predict_dir = "/home/tuan/linh/img2img_miccai2022/data/data/norm_in_img_full_petct_npz/pet_test"
+fake_dicom_out_dir = os.path.join(out_dir, "./fake_dicom/")
+origin_dicom_out_dir = os.path.join(out_dir, "./origin_dicom/")
 
 PET_MAX_VALUE = 32767 # Some file is just 32766
 PET_MIN_VALUE = 0
@@ -56,6 +59,17 @@ def unnormalize_data(img):
     img = (img / rescale_slope).astype(np.int16)
     return img, rescale_intercept, rescale_slope
 
+def unnormalize_data_with_origin_dicom(img, dataset):
+    print(img.max(), img.min(), dataset.pixel_array.max(), dataset.pixel_array.min(), dataset.RescaleSlope, dataset.RescaleIntercept)
+    origin_value = dataset.pixel_array * dataset.RescaleSlope + dataset.RescaleIntercept
+    o_max_value = origin_value.max()
+    o_min_value = origin_value.min()
+    print(o_max_value, o_min_value)
+    # img = img / 255.0
+    img = (img * (o_max_value - o_min_value)) + o_min_value
+    img = (img - dataset.RescaleIntercept) / dataset.RescaleSlope
+    return img.astype(np.int16)
+    # return img
 
 def create_fake_dicom(predict_path):
     name = predict_path.split("/")[-1]
@@ -67,11 +81,12 @@ def create_fake_dicom(predict_path):
     print(uid, idx, dicom_path)
 
     img = np.load(predict_path)['data']
-    img, rescale_intercept, rescale_slope = unnormalize_data(img)
+    # img, rescale_intercept, rescale_slope = unnormalize_data(img)
 
     ds = pydicom.dcmread(dicom_path)
+    img = unnormalize_data_with_origin_dicom(img, copy.deepcopy(ds))
 
-    print((img - ds.pixel_array).mean())
+    print(np.abs(img - ds.pixel_array).max())
 
     ds.PixelData = pydicom.encaps.encapsulate([img.tobytes()])
     ds['PixelData'].is_undefined_length = True

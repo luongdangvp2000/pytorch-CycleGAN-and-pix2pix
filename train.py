@@ -35,8 +35,8 @@ if __name__ == '__main__':
     opt_val = deepcopy(opt) # copy opt and change phase to test for creating val dataset
     opt_val.phase = 'val'
     opt_val.batch_size = 1 # use batch size 64 for fast validating  
-    
-    dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
+
+    dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options   
     val_dataset = create_dataset(opt_val) # create a valid dataset given opt.dataset_mode and other options
     dataset_size = len(dataset)    # get the number of images in the dataset.
     print('The number of training images = %d' % dataset_size, len(dataset.dataloader))
