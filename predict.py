@@ -23,8 +23,14 @@ if __name__ == '__main__':
     
 
     opt = TestOptions().parse()  # get test options
+    # opt.phase = 'val'
+    # opt = TrainOptions().parse()  # get test options
+    # opt.isTrain = False #
+
     # hard-code some parameters for test
     opt.num_threads = 0   # test code only supports num_threads = 0
+
+
     opt.batch_size = 1    # test code only supports batch_size = 1
     opt.serial_batches = True  # disable data shuffling; comment this line if results on randomly chosen images are needed.
     opt.no_flip = True    # no flip; comment this line if results on flipped images are needed.
@@ -45,6 +51,7 @@ if __name__ == '__main__':
         model.eval()
     opt.num_test = len(dataset.dataset)
     scores_dict = {}
+    print("start predict")
     for i, data in tqdm(enumerate(dataset)):
         if i >= opt.num_test:  # only apply our model to opt.num_test images.
             break
@@ -52,9 +59,10 @@ if __name__ == '__main__':
         # exit(0)
         model.set_input(data)  # unpack data from data loader
         model.forward()           # run inference
-        temp_fake_B, temp_real_B = model.get_current_visuals()['fake_B'], model.get_current_visuals()['real_B']
+        temp_fake_B, temp_real_B, temp_real_A = model.get_current_visuals()['fake_B'], model.get_current_visuals()['real_B'], model.get_current_visuals()['real_A']
         temp_fake_B = tensor2im(temp_fake_B, to_RGB=False)
         temp_real_B = tensor2im(temp_real_B, to_RGB=False)
+        temp_real_A = tensor2im(temp_real_A, to_RGB=False)
         # print("fake B predict ", temp_fake_B.shape, temp_fake_B.min(), temp_fake_B.max())
         # print("real B ", temp_real_B.shape, temp_real_B.min(), temp_real_B.max())
         # fake_B = tensor2im(model.fake_B, imtype=np.float32)[:, :, 0]
@@ -62,12 +70,14 @@ if __name__ == '__main__':
         path = data['B_paths'][0]
         origin_name = path.split("/")[-1].replace(".npz","_origin.png")
         predict_name = path.split("/")[-1].replace(".npz","_predict.png")
-
+        origin_A = path.split("/")[-1].replace(".npz","_CT.png")
 
         new_predict_path = os.path.join(predict_path, predict_name)
         new_orign_path = os.path.join(predict_path, origin_name)
+        new_A_path = os.path.join(predict_path, origin_A)
         cv2.imwrite(new_predict_path, temp_fake_B[:, :, 0])
         cv2.imwrite(new_orign_path, temp_real_B[:, :, 0])
+        cv2.imwrite(new_A_path, temp_real_A[:, :, 0])
 
         
         # np.savez_compressed(new_path, data=fake_B)

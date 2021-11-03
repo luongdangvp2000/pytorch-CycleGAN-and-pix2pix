@@ -52,7 +52,7 @@ class BaseOptions():
         parser.add_argument('--use_mask', default=False, action='store_true', help='if true, use mask A when training pix2pix')
         parser.add_argument('--lambda_mask', type=int, default=100, help='lambda for mask training type of pix2pix')
         # additional parameters
-        parser.add_argument('--epoch', type=str, default='best_psnr', help='which epoch to load? set to latest to use latest cached model')
+        parser.add_argument('--epoch', type=str, default='latest', help='which epoch to load? set to latest to use latest cached model')
         parser.add_argument('--load_iter', type=int, default='0', help='which iteration to load? if load_iter > 0, the code will load models by iter_[load_iter]; otherwise, the code will load models by [epoch]')
         parser.add_argument('--verbose', action='store_true', help='if specified, print more debugging information')
         parser.add_argument('--suffix', default='', type=str, help='customized suffix: opt.name = opt.name + suffix: e.g., {model}_{netG}_size{load_size}')

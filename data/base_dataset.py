@@ -143,9 +143,7 @@ def get_transform_for_petct(opt, params=None, convert=True):
     # elif 'scale_width' in opt.preprocess:
     #     transform_list.append(transforms.Lambda(lambda img: __scale_width(img, opt.load_size, opt.crop_size, method)))
     
-    # print(params)
-
-    if 'crop' in opt.preprocess:
+    # print(params)path.split("/")[-1].replace(".npz",".png")
         # if params is None:
         #     transform_list.append(transforms.RandomCrop(opt.crop_size))
         # else:

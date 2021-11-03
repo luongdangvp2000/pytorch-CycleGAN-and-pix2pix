@@ -24,7 +24,7 @@ from options.train_options import TrainOptions
 from data import create_dataset
 from models import create_model
 from util.visualizer import Visualizer, Logger
-from util.metric import PSNR, SSIM
+from util.metric import PSNR, SSIM, FID_v
 from validate import validate
 
 
@@ -48,8 +48,9 @@ if __name__ == '__main__':
     logger = Logger(opt)
     total_iters = 0                # the total number of training iterations
     model.print_networks(True)         # print the network
-    best_psnr = 0.0
-    best_ssim = 0.0
+    # best_psnr = 0.0
+    # best_ssim = 0.0
+    best_fid = 0.0
     best_mae = 10000
 
     for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    # outer loop for different epochs; we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>
@@ -98,16 +99,21 @@ if __name__ == '__main__':
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
 
         #===========================
-        psnr_value, ssim_value, mae_value = validate(model, val_dataset, epoch, logger)
-        if psnr_value > best_psnr:
-            best_psnr = psnr_value
-            model.save_networks("best_psnr")
+        # psnr_value, ssim_value, mae_value = validate(model, val_dataset, epoch, logger)
+        fid_value, mae_value = validate(model, val_dataset, epoch, logger)
+        # if psnr_value > best_psnr:
+        #     best_psnr = psnr_value
+        #     model.save_networks("best_psnr")
         
-        if ssim_value > best_ssim:
-            best_ssim = ssim_value
-            model.save_networks("best_ssim")
+        # if ssim_value > best_ssim:
+        #     best_ssim = ssim_value
+        #     model.save_networks("best_ssim")
+
+        if fid_value > best_fid:
+            best_fid = fid_value
+            model.save_networks("best_fid")
         
-        if mae_value > best_mae:
+        if mae_value < best_mae:
             best_mae = mae_value
             model.save_networks("best_mae")
 
