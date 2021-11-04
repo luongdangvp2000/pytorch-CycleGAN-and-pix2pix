@@ -28,8 +28,6 @@ from util.metric import PSNR, SSIM, FID_v
 from validate import validate
 
 
-
-
 if __name__ == '__main__':
     opt = TrainOptions().parse()   # get training options
     opt_val = deepcopy(opt) # copy opt and change phase to test for creating val dataset
@@ -48,16 +46,18 @@ if __name__ == '__main__':
     logger = Logger(opt)
     total_iters = 0                # the total number of training iterations
     model.print_networks(True)         # print the network
-    # best_psnr = 0.0
-    # best_ssim = 0.0
-    best_fid = 0.0
-    best_mae = 10000
 
+    best_psnr = 0.0
+    best_ssim = 0.0
+    best_fid = 10000
+    best_mae = 10000
+    
     for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    # outer loop for different epochs; we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>
         epoch_start_time = time.time()  # timer for entire epoch
         iter_data_time = time.time()    # timer for data loading per iteration
         epoch_iter = 0                  # the number of training iterations in current epoch, reset to 0 every epoch
         # visualizer.reset()              # reset the visualizer: make sure it saves the results to HTML at least once every epoch
+        
         model.update_learning_rate()    # update learning rates in the beginning of every epoch.
         for i, data in enumerate(dataset):  # inner loop within one epoch
             iter_start_time = time.time()  # timer for computation per iteration
@@ -97,10 +97,10 @@ if __name__ == '__main__':
             model.save_networks(epoch)
 
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
-
+        
         #===========================
         # psnr_value, ssim_value, mae_value = validate(model, val_dataset, epoch, logger)
-        fid_value, mae_value = validate(model, val_dataset, epoch, logger)
+        psnr_value, ssim_value, fid_value, mae_value = validate(model, val_dataset, epoch, logger)
         # if psnr_value > best_psnr:
         #     best_psnr = psnr_value
         #     model.save_networks("best_psnr")
@@ -109,7 +109,7 @@ if __name__ == '__main__':
         #     best_ssim = ssim_value
         #     model.save_networks("best_ssim")
 
-        if fid_value > best_fid:
+        if fid_value < best_fid:
             best_fid = fid_value
             model.save_networks("best_fid")
         
