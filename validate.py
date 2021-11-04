@@ -61,7 +61,7 @@ def validate(model, dataset, epoch, logger):
 
     psnr_list = np.concatenate(psnr_list, 0)
     ssim_list = np.concatenate(ssim_list, 0)
-    fid_list = np.concatenate(fid_list, 0)
+    fid_list = np.array(fid_list)
     mae_list = np.concatenate(mae_list, 0)
 
     psnr_value = psnr_list.mean()
