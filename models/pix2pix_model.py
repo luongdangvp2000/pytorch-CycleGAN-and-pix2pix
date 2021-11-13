@@ -2,6 +2,27 @@ import torch
 from .base_model import BaseModel
 from . import networks
 
+from torchvision import models
+import torch.nn as nn
+
+import numpy as np
+
+class VGGNet(nn.Module):
+        def __init__(self):
+            """Select conv1_1 ~ conv5_1 activation maps."""
+            super(VGGNet, self).__init__()
+            self.select = ['9', '36']
+            self.vgg = models.vgg19(pretrained=True).features
+
+        def forward(self, x):
+            """Extract multiple convolutional feature maps."""
+            features = []
+            for name, layer in self.vgg._modules.items():
+                x = layer(x)
+                if name in self.select:
+                    features.append(x)
+            return features[0], features[1]
+
 
 class Pix2PixModel(BaseModel):
     """ This class implements the pix2pix model, for learning a mapping from input images to output images given paired data.
@@ -131,6 +152,34 @@ class Pix2PixModel(BaseModel):
         self.loss_D.backward()
 
     def backward_G(self):
+        """Calculate Perceptual loss"""
+
+        perceptual=True 
+
+        if perceptual==True:
+            vgg = VGGNet().cuda().eval()
+            # print("Calculating perceptual...")
+            with torch.no_grad():
+                # A=self.real_A
+                # y = x.expand(39, 3, 20, 256, 256)
+                B_r=self.real_B.expand(32,3,256,256)
+                B_f=self.fake_B.expand(32,3,256,256)
+                # print(B_r.shape)
+
+                c = nn.MSELoss()
+
+
+                """feature map"""
+                fx1, fx2 = vgg(B_r)
+                fy1, fy2 = vgg(B_f)
+
+                m1 = c(fx1, fy1)
+                m2 = c(fx2, fy2)
+
+                self.perceptual_loss = (m1 + m2) * 0.00001 * 0.5
+        else:
+            self.perceptual_loss=0
+
         """Calculate GAN and L1 loss for the generator"""
         # First, G(A) should fake the discriminator
         fake_AB = torch.cat((self.real_A, self.fake_B), 1)
@@ -152,7 +201,7 @@ class Pix2PixModel(BaseModel):
             self.loss_G_L1 *= self.opt.lambda_L1
        
         # combine loss and calculate gradients
-        self.loss_G = self.loss_G_GAN + self.loss_G_L1
+        self.loss_G = self.loss_G_GAN + self.loss_G_L1 + self.perceptual_loss
         self.loss_G.backward()
 
     def optimize_parameters(self):
