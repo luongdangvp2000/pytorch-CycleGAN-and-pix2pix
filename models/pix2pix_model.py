@@ -162,9 +162,14 @@ class Pix2PixModel(BaseModel):
             with torch.no_grad():
                 # A=self.real_A
                 # y = x.expand(39, 3, 20, 256, 256)
-                B_r=self.real_B.expand(32,3,256,256)
-                B_f=self.fake_B.expand(32,3,256,256)
+                # B_r=self.real_B.expand(32,3,256,256)
+                # B_f=self.fake_B.expand(32,3,256,256)
                 # print(B_r.shape)
+
+                B_r = self.real_B.repeat(1,3,1,1)
+                B_f = self.fake_B.repeat(1,3,1,1)
+                # print(B_r.shape)
+                # print(B_r.repeat(1,3,1,1).shape)
 
                 c = nn.MSELoss()
 
