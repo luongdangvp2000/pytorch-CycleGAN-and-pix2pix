@@ -52,9 +52,10 @@ if __name__ == '__main__':
         # exit(0)
         model.set_input(data)  # unpack data from data loader
         model.forward()           # run inference
-        temp_fake_B, temp_real_B = model.get_current_visuals()['fake_B'], model.get_current_visuals()['real_B']
+        temp_fake_B, temp_real_B, temp_real_A = model.get_current_visuals()['fake_B'], model.get_current_visuals()['real_B'], model.get_current_visuals()['real_A']
         temp_fake_B = tensor2im(temp_fake_B, to_RGB=False)
         temp_real_B = tensor2im(temp_real_B, to_RGB=False)
+        temp_real_A = tensor2im(temp_real_A, to_RGB=False)
         # print("fake B predict ", temp_fake_B.shape, temp_fake_B.min(), temp_fake_B.max())
         # print("real B ", temp_real_B.shape, temp_real_B.min(), temp_real_B.max())
         # fake_B = tensor2im(model.fake_B, imtype=np.float32)[:, :, 0]
@@ -62,12 +63,16 @@ if __name__ == '__main__':
         path = data['B_paths'][0]
         origin_name = path.split("/")[-1].replace(".npz","_origin.png")
         predict_name = path.split("/")[-1].replace(".npz","_predict.png")
+        CT_name = path.split("/")[-1].replace(".npz","_CT.png")
+
 
 
         new_predict_path = os.path.join(predict_path, predict_name)
         new_orign_path = os.path.join(predict_path, origin_name)
+        new_CT_path = os.path.join(predict_path, CT_name)
         cv2.imwrite(new_predict_path, temp_fake_B[:, :, 0])
         cv2.imwrite(new_orign_path, temp_real_B[:, :, 0])
+        cv2.imwrite(new_predict_path, temp_real_A[:, :, 0])
 
         
         # np.savez_compressed(new_path, data=fake_B)
