@@ -72,7 +72,7 @@ if __name__ == '__main__':
         new_CT_path = os.path.join(predict_path, CT_name)
         cv2.imwrite(new_predict_path, temp_fake_B[:, :, 0])
         cv2.imwrite(new_orign_path, temp_real_B[:, :, 0])
-        cv2.imwrite(new_predict_path, temp_real_A[:, :, 0])
+        cv2.imwrite(new_CT_path, temp_real_A[:, :, 0])
 
         
         # np.savez_compressed(new_path, data=fake_B)
