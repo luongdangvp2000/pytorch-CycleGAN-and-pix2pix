@@ -160,19 +160,11 @@ class Pix2PixModel(BaseModel):
             vgg = VGGNet().cuda().eval()
             # print("Calculating perceptual...")
             with torch.no_grad():
-                # A=self.real_A
-                # y = x.expand(39, 3, 20, 256, 256)
-                # B_r=self.real_B.expand(32,3,256,256)
-                # B_f=self.fake_B.expand(32,3,256,256)
-                # print(B_r.shape)
 
                 B_r = self.real_B.repeat(1,3,1,1)
                 B_f = self.fake_B.repeat(1,3,1,1)
-                # print(B_r.shape)
-                # print(B_r.repeat(1,3,1,1).shape)
 
                 c = nn.MSELoss()
-
 
                 """feature map"""
                 fx1, fx2 = vgg(B_r)
@@ -181,7 +173,7 @@ class Pix2PixModel(BaseModel):
                 m1 = c(fx1, fy1)
                 m2 = c(fx2, fy2)
 
-                self.loss_G_perceptual = (m1 + m2) * 0.001 * 0.5
+                self.loss_G_perceptual = (m1 + m2) * 0.00001 * 0.5
         else:
             self.loss_G_perceptual=0
 
