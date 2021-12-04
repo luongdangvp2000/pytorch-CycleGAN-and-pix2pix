@@ -89,6 +89,7 @@ class Pix2PixModel(BaseModel):
 
         if self.isTrain:
             # define loss functions
+            self.vgg = VGGNet().cuda().eval()
             self.criterionGAN = networks.GANLoss(opt.gan_mode).to(self.device)
             # initialize optimizers; schedulers will be automatically created by function <BaseModel.setup>.
             self.optimizer_G = torch.optim.Adam(self.netG.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -157,7 +158,7 @@ class Pix2PixModel(BaseModel):
         perceptual=True 
 
         if perceptual==True:
-            vgg = VGGNet().cuda().eval()
+            
             # print("Calculating perceptual...")
             with torch.no_grad():
 
@@ -167,8 +168,8 @@ class Pix2PixModel(BaseModel):
                 c = nn.MSELoss()
 
                 """feature map"""
-                fx1, fx2 = vgg(B_r)
-                fy1, fy2 = vgg(B_f)
+                fx1, fx2 = self.vgg(B_r)
+                fy1, fy2 = self.vgg(B_f)
 
                 m1 = c(fx1, fy1)
                 m2 = c(fx2, fy2)
