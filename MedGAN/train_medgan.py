@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument('--load_size', type=int, default=256, help='scale images to this size')
     parser.add_argument('--crop_size', type=int, default=256, help='then crop to this size')
     parser.add_argument('--max_dataset_size', type=int, default=float("inf"), help='Maximum number of samples allowed per dataset. If the dataset directory contains more than max_dataset_size, only a subset is loaded.')
+    parser.add_argument('--phase', type=str, default='train')
     
     args = parser.parse_args()
 
@@ -38,7 +39,7 @@ if __name__ == "__main__":
     # train_loader = PairedImages_PETCT(dataroot, val_phase, max_dataset_size)
     # test_loader = PairedImages_PETCT(dataroot, val_phase, max_dataset_size)
 
-    train_loader = create_dataset(dataroot, val_phase, max_dataset_size)
+    train_loader = create_dataset(dataroot, train_phase, max_dataset_size)
     test_loader = create_dataset(dataroot, val_phase, max_dataset_size)
 
     netG_A = CasUNet_3head(1,1)
