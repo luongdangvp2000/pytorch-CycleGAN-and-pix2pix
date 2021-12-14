@@ -63,8 +63,8 @@ def train_i2i_UNet3headGAN(
             avg_tot_loss = 0
             # print(len(train_loader))
             for i, batch in enumerate(train_loader):
-                if i>1000:
-                    break
+                # if i>1000:
+                #     break
                 xA, xB = batch[0].to(device).type(dtype), batch[1].to(device).type(dtype)
                 #" xA: real A; xB: real B"
                 # calc all the required outputs
