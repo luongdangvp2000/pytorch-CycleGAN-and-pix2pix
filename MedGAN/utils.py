@@ -154,7 +154,7 @@ def train_i2i_Cas_UNet3headGAN(
             netD_A.train()
             avg_rec_loss = 0
             avg_tot_loss = 0
-            print(len(train_loader))
+            # print(len(train_loader))
             for i, batch in enumerate(train_loader):
                 if i>1000:
                     break
@@ -200,16 +200,16 @@ def train_i2i_Cas_UNet3headGAN(
 
                 avg_tot_loss += total_loss.item()
 
-                if i%500 == 0:
-                    print(eph, i)
-                    test_uncorr2CT_Cas_UNet3headGAN_n_show(
-                        list_netG_A,
-                        test_loader,
-                        device,
-                        dtype,
-                        nrow=1,
-                        n_show = 1
-                    )
+                # if i%500 == 0:
+                #     print(eph, i)
+                #     test_uncorr2CT_Cas_UNet3headGAN_n_show(
+                #         list_netG_A,
+                #         test_loader,
+                #         device,
+                #         dtype,
+                #         nrow=1,
+                #         n_show = 1
+                #     )
             avg_tot_loss /= len(train_loader)
             print(
                 'epoch: [{}/{}] | avg_tot_loss: {}'.format(

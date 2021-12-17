@@ -32,7 +32,7 @@ def get_transform_for_petct(preprocess='resize_and_crop', load_size=256, crop_si
     # load_size=256 #scale images to this size
     # crop_size=256 #'then crop to this size')
     # no_flip=False #', action='store_true', help='if specified, do not flip the images for data augmentation')
-
+    no_flip = True
     if 'resize' in preprocess:
         transform_list.append(A.Resize(load_size, load_size, interpolation=cv2.INTER_NEAREST))
     if 'crop' in preprocess:
@@ -101,7 +101,7 @@ class PairedImages_PETCT(data.Dataset):
 
         A = A_transform(A)
         B = B_transform(B)
-        return A, B
+        return A, B, self.AB_paths[index]
 
     def __len__(self):
         """Return the total number of images in the dataset."""
