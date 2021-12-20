@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # first load the prior Generators 
     netG_A1 = CasUNet_3head(1,1)
-    netG_A1.load_state_dict(torch.load(args.ckpt_path + "i2i_0_UNet3headGAN_eph49_G_A.pth"))
+    netG_A1.load_state_dict(torch.load(args.ckpt_path + "i2i_0_UNet3headGAN_eph149_G_A.pth"))
 
     netG_A2 = UNet_3head(4,1)
     netD_A = NLayerDiscriminator(1, n_layers=4)
