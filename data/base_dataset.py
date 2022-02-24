@@ -9,7 +9,7 @@ from PIL import Image
 import torchvision.transforms as transforms
 from abc import ABC, abstractmethod
 import albumentations as A
-from albumentations.pytorch.transforms import ToTensor, ToTensorV2
+from albumentations.pytorch.transforms import ToTensor#, ToTensorV2
 import cv2
 import torch
 
