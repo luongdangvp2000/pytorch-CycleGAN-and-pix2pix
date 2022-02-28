@@ -135,7 +135,9 @@ bash ./datasets/download_pix2pix_dataset.sh facades
 ```bash
 #!./scripts/train_pix2pix.sh
 python train.py --dataroot ./datasets/facades --name facades_pix2pix --model pix2pix --direction BtoA
-python train.py --dataroot /content/drive/MyDrive/suv_npz_split_stratify_threshold --name pet_ct_pix2pix --model pix2pix --dataset_mode petctaligned --direction AtoB #train pet_ct
+
+python train.py --dataroot /content/drive/MyDrive/suv_npz_split_stratify_threshold --checkpoints_dir '/content/drive/MyDrive/Machine learning/PET CT/checkpoints_model_pix2pix' --name pet_ct_pix2pix --model pix2pix --dataset_mode petctaligned --direction AtoB --batch_size 128 --continue_train --epoch_count 180 #
+
 ```
 To see more intermediate results, check out  `./checkpoints/facades_pix2pix/web/index.html`.
 
