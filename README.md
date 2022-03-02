@@ -136,7 +136,7 @@ bash ./datasets/download_pix2pix_dataset.sh facades
 #!./scripts/train_pix2pix.sh
 python train.py --dataroot ./datasets/facades --name facades_pix2pix --model pix2pix --direction BtoA
 
-python train.py --dataroot /content/drive/MyDrive/suv_npz_split_stratify_threshold --checkpoints_dir '/content/drive/MyDrive/Machine learning/PET CT/checkpoints_model_pix2pix' --name pet_ct_pix2pix --model pix2pix --dataset_mode petctaligned --direction AtoB --batch_size 128 --continue_train --epoch_count 180 #
+python train.py --dataroot /content/drive/MyDrive/suv_npz_split_stratify_threshold --checkpoints_dir '/content/drive/MyDrive/Machine learning/PET CT/checkpoints_model_pix2pix' --name pet_ct_pix2pix --model pix2pix --dataset_mode petctaligned --direction AtoB --batch_size 128 --continue_train --epoch_count 180 #train petct
 
 ```
 To see more intermediate results, check out  `./checkpoints/facades_pix2pix/web/index.html`.
@@ -145,6 +145,7 @@ To see more intermediate results, check out  `./checkpoints/facades_pix2pix/web/
 ```bash
 #!./scripts/test_pix2pix.sh
 python test.py --dataroot ./datasets/facades --name facades_pix2pix --model pix2pix --direction BtoA
+python test.py --dataroot /content/drive/MyDrive/suv_npz_split_stratify_threshold --checkpoints_dir '/content/drive/MyDrive/Machine learning/PET CT/checkpoints_model_pix2pix' --model pix2pix --dataset_mode petctaligned --batch_size 128 --name pet_ct_pix2pix --results_dir '/content/drive/MyDrive/Machine learning/PET CT/results_dir' #test petct
 ```
 - The test results will be saved to a html file here: `./results/facades_pix2pix/test_latest/index.html`. You can find more scripts at `scripts` directory.
 - To train and test pix2pix-based colorization models, please add `--model colorization` and `--dataset_mode colorization`. See our training [tips](https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/tips.md#notes-on-colorization) for more details.
